@@ -88,11 +88,14 @@
       loadingBar.style.display = "block";
 
       var script = document.createElement("script");
+      var gameInstance = null
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
+          gameInstance = unityInstance;
+          CreateEventListeners()
           loadingBar.style.display = "none";
           fullscreenButton.onclick = () => {
             unityInstance.SetFullscreen(1);
@@ -102,6 +105,21 @@
         });
       };
       document.body.appendChild(script);
+
+      function CreateEventListeners(){
+        document.addEventListener("visibilitychange",function(){
+          gameInstance.SendMessage("Character","OnVisibilityChange")
+          console.log("visibilty changed");
+        })
+
+        window.addEventListener("beforeunload",function(event){
+          gameInstance.SendMessage("Character","OnVisibilityChange")
+          console.log("on close executed");
+          event.returnValue = "";
+        })
+
+        console.log("Added event listeners");
+      }
     </script>
   </body>
 </html>
